@@ -4,57 +4,126 @@ create table regions(
 );
 
 create table countries(
-	country_id varchar(2) primary key,
+	country_id serial primary key,
 	country_name varchar(60),
 	region_id integer not null,
 	foreign key (region_id) references regions(region_id) on update cascade on delete cascade
 );
 
 create table locations(
-	location_id varchar(2)primary key,
+	location_id serial primary key,
 	street_address varchar(150),
 	postal_code varchar(40),
 	city varchar(60),
 	state_province varchar (80),
-	country_id varchar(2) not null,
+	country_id INTEGER,
 	foreign key(country_id) references countries(country_id) on update cascade on delete cascade
 );
-alter table locations alter column location_id type varchar(5) // varchar di location kurang (2) dan dirubah menjadi (5)
 
 create table departments(
-	department_id varchar(2)primary key,
+	department_id serial primary key,
 	department_name varchar(100),
-	location_id varchar(2) not null,
+	location_id integer,
 	foreign key(location_id) references locations(location_id) on update cascade on delete cascade
 );
 
-alter table departments alter column location_id type varchar(5) // varchar di location kurang (2) dan dirubah menjadi (5)
-
 create table employees(
-	employee_id varchar(3)primary key,
+	employee_id serial primary key,
 	first_name varchar(60),
-	last_name varchar(40),
-	email varchar(60),
+	last_name varchar(40) NOT NULL,
+	email varchar(60) NOT NULL,
 	phone_number varchar (60),
 	hire_date DATE NOT NULL,
-	job_id varchar(4),
-	salary varchar (40),
-	manager_id varchar (3),
-	department_id varchar(2) not null,
+	job_id INTEGER NOT NULL,
+	salary numeric (8, 2),
+	manager_id integer,
+	department_id integer,
 	foreign key(manager_id) references employees(employee_id) on update cascade on delete cascade,
-	foreign key(department_id) references departments(department_id) on update cascade on delete cascade
+	foreign key(department_id) references departments(department_id) on update cascade on delete cascade,
+	foreign key(job_id) references jobs(job_id) on update cascade on delete cascade 
 );
 
-
-alter table employees add constraint job_id foreign key(job_id) references jobs(job_id) on update cascade on delete cascade // saya lupa untuk job_idnya di pembuatan table employees
-
 create table dependents(
-	dependent_id varchar(3)primary key,
-	first_name varchar(60),
-	last_name varchar(40),
-	relationship varchar (100),
-	employee_id varchar (2) not NULL,
+	dependent_id serial primary key,
+	first_name varchar(60) NOT NULL,
+	last_name varchar(40) NOT NULL,
+	relationship varchar (100) NOT NULL,
+	employee_id INTEGER,
 	foreign key(employee_id) references employees(employee_id) on update cascade on delete cascade
 );
 
-alter table dependents alter column employee_id type varchar(5) // varchar di employee_id kurang (2) dan dirubah menjadi (5)
+
+
+
+
+
+
+
+Jawab soal PDF . 
+
+1. membuat table projects terlebih dahulu
+
+Create table Projects(
+proj_id SERIAL primary key,
+proj_name varchar(100),
+proj_createdon date NOT NULL,
+proj_duedate DATE NOT NULL,
+proj_cust_name varchar (100)
+);
+
+membuat project_assigment sebagai relasi many to many
+
+
+Create table project_assigment(
+project_assigment_id serial primary key,
+pras_proj_id INTEGER,
+pras_employee_id INTEGER,
+foreign key(pras_employee_id) references employees(employee_id) on update cascade on delete cascade,
+foreign key(pras_proj_id) references projects(proj_id) on update cascade on delete cascade
+);
+
+2. buat sintak menambah kolom
+
+
+ALTER TABLE projects add column proj_description varchar(255);
+
+ALTER TABLE projects add column proj_status varchar(15);
+
+ALTER TABLE projects add column proj_amont numeric(8, 2);
+
+3. membuat kolom proj_account_mgr  dengan tipe data integer dan buat
+juga constraint foreign key antara table projects dan employees.
+
+ALTER TABLE projects add column proj_account_mgr INTEGER
+
+ALTER TABLE employees 
+ADD COLUMN proj_account_mgr integer UNIQUE;
+ADD CONSTRAINT proj_account_mgr_fkey FOREIGN KEY (proj_account_mgr) REFERENCES employees(proj_account_mgr)on update cascade on delete cascade
+);
+
+4. Buat sintak insert ke table projects minimal 3 record, kolom proj_account_mgr hanya bisa diisi
+value oleh employee yang memiliki jabatan manager. 
+
+INSERT INTO projects(proj_account_mgr) VALUES ('E-COMMERCE');
+INSERT INTO projects(proj_account_mgr) VALUES ('TRAVELOCA');
+INSERT INTO projects(proj_account_mgr) VALUES ('TIKET.COM');
+
+5.Buat sintak insert ke table project_assignment dengan value seperti di table, dengan employee
+yang ada di department IT.
+
+INSERT INTO project_assigment(pras_proj_id,pras_employee_id,pras_startdate,pras_enddate,pras_status) VALUES ('1','104,'2021-09-14','','assigned');
+INSERT INTO project_assigment(pras_proj_id,pras_employee_id,pras_startdate,pras_enddate,pras_status) VALUES ('1','105,'2021-09-14','2021-09-17','COMPLETED');
+
+INSERT INTO project_assigment(pras_proj_id,pras_employee_id,pras_startdate,pras_enddate,pras_status) VALUES ('1','106,'2021-09-14','','INPROGRESS');
+
+INSERT INTO project_assigment(pras_proj_id,pras_employee_id,pras_startdate,pras_enddate,pras_status) VALUES ('2','104,'2021-09-14','','assigned');
+INSERT INTO project_assigment(pras_proj_id,pras_employee_id,pras_startdate,pras_enddate,pras_status) VALUES ('2','105,'2021-09-14','2021-09-17','COMPLETED');
+INSERT INTO project_assigment(pras_proj_id,pras_employee_id,pras_startdate,pras_enddate,pras_status) VALUES ('2','106,'2021-09-14','','INPROGRESS');
+
+6.Tampilkan employee yang pras_status nya sudah completed di tiap project. 
+
+SELECT * FROM projects Where pros_status ='COMPLETED';
+
+
+
+
